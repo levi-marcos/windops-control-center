@@ -1,0 +1,57 @@
+<header class="topbar">
+  <div class="brand">
+    <span class="icon">⚡</span>
+    <div class="titles">
+      <h1>WINDOPS</h1>
+      <span class="subtitle">Control Center Fullstack</span>
+    </div>
+  </div>
+
+  <nav class="nav-links">
+    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Dashboard</a>
+    <a routerLink="/assets" routerLinkActive="active">Ativos</a>
+    <a routerLink="/alerts" routerLinkActive="active">Alertas</a>
+  </nav>
+
+  <div class="topbar-actions">
+    <!-- Indicador de Status da API -->
+    <div 
+      class="health-badge" 
+      [class.online]="apiState() === 'online'"
+      [class.offline]="apiState() === 'offline'"
+      [class.loading]="apiState() === 'loading'"
+      [attr.aria-label]="'Status da API: ' + apiState()"
+    >
+      <span class="status-dot"></span>
+      <span class="status-text">
+        @if (apiState() === 'loading') {
+          API Verificando...
+        } @else if (apiState() === 'online') {
+          API Online
+        } @else {
+          API Indisponível
+        }
+      </span>
+      <button 
+        type="button" 
+        class="btn-refresh" 
+        (click)="checkHealth()" 
+        title="Atualizar status da API"
+        aria-label="Atualizar status da API"
+      >
+        ↻
+      </button>
+    </div>
+  </div>
+</header>
+
+@if (apiState() === 'offline' && errorMessage()) {
+  <div class="offline-banner" role="alert">
+    <span>⚠️ <strong>Aviso de Conexão:</strong> {{ errorMessage() }} Verifique se o backend NestJS está rodando na porta 3000.</span>
+    <button type="button" class="btn-retry" (click)="checkHealth()">Tentar novamente</button>
+  </div>
+}
+
+<main class="main-container">
+  <router-outlet></router-outlet>
+</main>
