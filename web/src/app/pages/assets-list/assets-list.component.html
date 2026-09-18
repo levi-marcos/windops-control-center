@@ -1,0 +1,107 @@
+<section class="assets-page">
+  <div class="page-header">
+    <div>
+      <h2>Ativos Operacionais</h2>
+      <p class="subtitle">Parque de geração eólica e solar em tempo real</p>
+    </div>
+
+    <!-- Barra de Filtros -->
+    <div class="filters-bar">
+      <div class="filter-group">
+        <label for="status-filter">Status:</label>
+        <select id="status-filter" [value]="filterStatus()" (change)="onStatusFilter($event)">
+          <option value="">Todos os status</option>
+          <option value="ONLINE">Online</option>
+          <option value="ATTENTION">Atenção</option>
+          <option value="MAINTENANCE">Manutenção</option>
+          <option value="OFFLINE">Offline</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="type-filter">Tipo:</label>
+        <select id="type-filter" [value]="filterType()" (change)="onTypeFilter($event)">
+          <option value="">Todos os tipos</option>
+          <option value="WIND_TURBINE">Turbina Eólica</option>
+          <option value="SOLAR_ARRAY">Painel Solar</option>
+        </select>
+      </div>
+
+      <button type="button" class="btn-refresh" (click)="loadAssets()" title="Recarregar ativos">
+        Recarregar
+      </button>
+    </div>
+  </div>
+
+  <!-- 1. Estado de LOADING -->
+  @if (loading()) {
+    <div class="state-container loading-state">
+      <div class="spinner"></div>
+      <p>Carregando telemetria e ativos do parque...</p>
+    </div>
+  }
+
+  <!-- 2. Estado de ERRO -->
+  @else if (error()) {
+    <div class="state-container error-state" role="alert">
+      <div class="error-icon">⚠️</div>
+      <h3>Erro na comunicação</h3>
+      <p>{{ error() }}</p>
+      <button type="button" class="btn-primary" (click)="loadAssets()">Tentar novamente</button>
+    </div>
+  }
+
+  <!-- 3. Estado VAZIO (EMPTY) -->
+  @else if (assets().length === 0) {
+    <div class="state-container empty-state">
+      <div class="empty-icon">📭</div>
+      <h3>Nenhum ativo encontrado</h3>
+      <p>Não há ativos cadastrados que atendam aos filtros selecionados.</p>
+    </div>
+  }
+
+  <!-- 4. Estado de SUCESSO com Cards -->
+  @else {
+    <div class="assets-grid">
+      @for (asset of assets(); track asset.id) {
+        <article class="asset-card" [class]="'status-' + asset.status.toLowerCase()">
+          <header class="card-header">
+            <span class="asset-id">{{ asset.id }}</span>
+            <span class="status-pill" [class]="'status-' + asset.status.toLowerCase()">
+              <span class="dot"></span>
+              {{ asset.status }}
+            </span>
+          </header>
+
+          <div class="card-body">
+            <h3 class="asset-name">{{ asset.name }}</h3>
+            
+            <div class="asset-meta">
+              <span class="meta-item">
+                <span class="icon">
+                  @if (asset.type === 'WIND_TURBINE') { 🌬️ } @else { ☀️ }
+                </span>
+                {{ asset.type === 'WIND_TURBINE' ? 'Turbina Eólica' : 'Painel Solar' }}
+              </span>
+              <span class="meta-item">
+                <span class="icon">📍</span>
+                {{ asset.location }}
+              </span>
+            </div>
+
+            <div class="asset-power">
+              <span class="power-label">Potência Nominal</span>
+              <strong class="power-value">{{ asset.ratedPowerMw }} MW</strong>
+            </div>
+          </div>
+
+          <footer class="card-footer">
+            <a [routerLink]="['/assets', asset.id]" class="btn-detail">
+              Ver Telemetria & Detalhes →
+            </a>
+          </footer>
+        </article>
+      }
+    </div>
+  }
+</section>

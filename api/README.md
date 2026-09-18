@@ -131,6 +131,7 @@ Quando `WARNING` ou `CRITICAL`, a API cria um alerta `HIGH_TEMPERATURE`. Classif
 | `GET` | `/assets/:id/telemetry` | Lista leituras do ativo |
 | `GET` | `/assets/:id/summary` | Resumo operacional do ativo |
 | `GET` | `/alerts` | Lista alertas (aceita `?severity=` e `?assetId=`) |
+| `GET` | `/dashboard/overview` | KPIs agregados para o dashboard (contagem única de ativos/alertas) |
 
 **Documentação interativa (Swagger):** `GET /docs`
 
@@ -198,6 +199,21 @@ curl "http://localhost:3000/assets/WT-001/summary"
 ### 5. Listar alertas com filtro
 ```bash
 curl "http://localhost:3000/alerts?severity=CRITICAL"
+```
+
+### 6. KPIs do dashboard (endpoint agregado)
+```bash
+curl "http://localhost:3000/dashboard/overview"
+```
+```json
+{
+  "totalAssets": 3,
+  "onlineAssets": 2,
+  "attentionAssets": 0,
+  "maintenanceAssets": 1,
+  "criticalAlerts": 1,
+  "totalAlerts": 2
+}
 ```
 
 ---
@@ -349,6 +365,10 @@ src/
 │   ├── alerts.controller.ts
 │   ├── alerts.service.ts
 │   └── alerts.module.ts
+├── dashboard/
+│   ├── dashboard.controller.ts   # GET /dashboard/overview (KPIs agregados)
+│   ├── dashboard.service.ts
+│   └── dashboard.module.ts
 ├── app.controller.ts           # GET /health
 ├── app.module.ts
 └── main.ts                     # bootstrap + ValidationPipe + Swagger
@@ -379,6 +399,7 @@ AssetsModule            →  importa AlertsModule   →  telemetria gera alertas
 - [x] Regra NORMAL/WARNING/CRITICAL + geração de alerta
 - [x] `GET /alerts`
 - [x] `GET /assets/:id/summary`
+- [x] `GET /dashboard/overview` (KPIs agregados)
 - [x] Swagger em `/docs`
 - [x] Testes (unit + e2e)
 - [x] Prisma + SQLite (dev) / PostgreSQL (produção) — persistência real

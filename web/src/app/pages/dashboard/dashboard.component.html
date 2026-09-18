@@ -1,0 +1,96 @@
+<section class="dashboard-page">
+  <div class="page-header">
+    <div>
+      <h2>Dashboard Operacional</h2>
+      <p class="subtitle">Visão executiva dos ativos e alertas do parque</p>
+    </div>
+    <button type="button" class="btn-refresh" (click)="loadOverview()" title="Recarregar KPIs">
+      Atualizar
+    </button>
+  </div>
+
+  <!-- 1. Estado de LOADING -->
+  @if (loading()) {
+    <div class="state-container loading-state">
+      <div class="spinner"></div>
+      <p>Carregando KPIs do parque...</p>
+    </div>
+  }
+
+  <!-- 2. Estado de ERRO -->
+  @else if (error()) {
+    <div class="state-container error-state" role="alert">
+      <div class="state-icon">⚠️</div>
+      <h3>Erro na comunicação</h3>
+      <p>{{ error() }}</p>
+      <button type="button" class="btn-primary" (click)="loadOverview()">Tentar novamente</button>
+    </div>
+  }
+
+  <!-- 3. Estado VAZIO (EMPTY) -->
+  @else if (overview() && overview()?.totalAssets === 0) {
+    <div class="state-container empty-state">
+      <div class="state-icon">📭</div>
+      <h3>Nenhum ativo cadastrado</h3>
+      <p>Cadastre o primeiro ativo para começar a operar.</p>
+    </div>
+  }
+
+  <!-- 4. SUCESSO: KPIs -->
+  @else if (overview()) {
+    <div class="kpi-grid">
+      <a class="kpi-card" routerLink="/assets">
+        <span class="kpi-label">Total de Ativos</span>
+        <strong class="kpi-value">{{ overview()?.totalAssets }}</strong>
+        <small class="kpi-sub">Ativos cadastrados</small>
+      </a>
+
+      <a class="kpi-card kpi-online" routerLink="/assets">
+        <span class="kpi-label">Online</span>
+        <strong class="kpi-value">{{ overview()?.onlineAssets }}</strong>
+        <small class="kpi-sub">Em operação</small>
+      </a>
+
+      <a class="kpi-card kpi-attention" routerLink="/assets">
+        <span class="kpi-label">Atenção</span>
+        <strong class="kpi-value">{{ overview()?.attentionAssets }}</strong>
+        <small class="kpi-sub">Exigem atenção</small>
+      </a>
+
+      <a class="kpi-card kpi-maintenance" routerLink="/assets">
+        <span class="kpi-label">Manutenção</span>
+        <strong class="kpi-value">{{ overview()?.maintenanceAssets }}</strong>
+        <small class="kpi-sub">Em manutenção</small>
+      </a>
+
+      <a class="kpi-card kpi-critical" routerLink="/alerts">
+        <span class="kpi-label">Alertas Críticos</span>
+        <strong class="kpi-value">{{ overview()?.criticalAlerts }}</strong>
+        <small class="kpi-sub">Severidade CRITICAL</small>
+      </a>
+
+      <a class="kpi-card" routerLink="/alerts">
+        <span class="kpi-label">Total de Alertas</span>
+        <strong class="kpi-value">{{ overview()?.totalAlerts }}</strong>
+        <small class="kpi-sub">Todos os registros</small>
+      </a>
+    </div>
+
+    <div class="quick-links">
+      <a class="quick-link" routerLink="/assets">
+        <span class="quick-icon">⚙️</span>
+        <div>
+          <strong>Gerenciar Ativos</strong>
+          <small>Abrir lista, filtros e detalhe de cada ativo</small>
+        </div>
+      </a>
+      <a class="quick-link" routerLink="/alerts">
+        <span class="quick-icon">🚨</span>
+        <div>
+          <strong>Ver Alertas</strong>
+          <small>Inspecionar WARNING e CRITICAL gerados pela API</small>
+        </div>
+      </a>
+    </div>
+  }
+</section>

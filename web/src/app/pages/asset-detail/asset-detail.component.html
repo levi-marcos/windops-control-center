@@ -1,0 +1,218 @@
+<section class="detail-page">
+  <!-- Navegação de volta -->
+  <div class="breadcrumb">
+    <a routerLink="/assets" class="btn-back">← Voltar para Ativos</a>
+  </div>
+
+  <!-- 1. Estado de LOADING -->
+  @if (loading()) {
+    <div class="state-container loading-state">
+      <div class="spinner"></div>
+      <p>Buscando dados operacionais do ativo em tempo real...</p>
+    </div>
+  }
+
+  <!-- 2. Estado de 404 NOT FOUND -->
+  @else if (notFound()) {
+    <div class="state-container not-found-state">
+      <div class="state-icon">🔍</div>
+      <h3>Ativo Não Encontrado</h3>
+      <p>O ativo <strong>{{ assetId() }}</strong> não existe no sistema ou foi desativado.</p>
+      <a routerLink="/assets" class="btn-primary">Voltar para a Lista</a>
+    </div>
+  }
+
+  <!-- 3. Estado de ERRO -->
+  @else if (error()) {
+    <div class="state-container error-state" role="alert">
+      <div class="state-icon">⚠️</div>
+      <h3>Erro na Conexão</h3>
+      <p>{{ error() }}</p>
+      <button type="button" class="btn-primary" (click)="loadAllData(assetId())">Tentar novamente</button>
+    </div>
+  }
+
+  <!-- 4. SUCESSO: Detalhe do Ativo -->
+  @else if (asset()) {
+    <header class="asset-header">
+      <div class="title-area">
+        <span class="id-badge">{{ asset()?.id }}</span>
+        <h2>{{ asset()?.name }}</h2>
+        <span class="meta-tag">📍 {{ asset()?.location }}</span>
+        <span class="meta-tag">⚡ {{ asset()?.ratedPowerMw }} MW</span>
+      </div>
+
+      <div class="status-area">
+        <span class="status-pill" [class]="'status-' + asset()?.status?.toLowerCase()">
+          <span class="dot"></span>
+          {{ asset()?.status }}
+        </span>
+      </div>
+    </header>
+
+    <!-- CARDS DE SUMMARY (MÉTRICAS) -->
+    @if (summary()) {
+      <div class="summary-metrics">
+        <div class="metric-card">
+          <span class="metric-label">Potência Média</span>
+          <strong class="metric-value">{{ summary()?.averagePowerMw }} MW</strong>
+          <small class="metric-sub">Baseado nas leituras</small>
+        </div>
+
+        <div class="metric-card" [class.metric-alert]="(summary()?.maxTemperatureC ?? 0) >= 80">
+          <span class="metric-label">Temperatura Máxima</span>
+          <strong class="metric-value">
+            {{ summary()?.maxTemperatureC !== null ? (summary()?.maxTemperatureC + ' °C') : 'Sem dados' }}
+          </strong>
+          <small class="metric-sub">Pico registrado</small>
+        </div>
+
+        <div class="metric-card">
+          <span class="metric-label">Amostras Coletadas</span>
+          <strong class="metric-value">{{ summary()?.samples }}</strong>
+          <small class="metric-sub">Total de registros</small>
+        </div>
+
+        <div class="metric-card" [class.has-warnings]="(summary()?.warningAlerts ?? 0) > 0">
+          <span class="metric-label">Alertas Atenção</span>
+          <strong class="metric-value">{{ summary()?.warningAlerts }}</strong>
+          <small class="metric-sub">Warning</small>
+        </div>
+
+        <div class="metric-card" [class.has-critical]="(summary()?.criticalAlerts ?? 0) > 0">
+          <span class="metric-label">Alertas Críticos</span>
+          <strong class="metric-value">{{ summary()?.criticalAlerts }}</strong>
+          <small class="metric-sub">Critical</small>
+        </div>
+      </div>
+    }
+
+    <!-- PAINEL OPERACIONAL: TELEMETRIA + FORMULÁRIO -->
+    <div class="operational-grid">
+      <!-- Coluna Esquerda: Histórico de Telemetria Recente -->
+      <section class="telemetry-section">
+        <div class="section-header">
+          <h3>Telemetria Recente</h3>
+          <span class="count-badge">{{ telemetry().length }} registros</span>
+        </div>
+
+        @if (telemetry().length === 0) {
+          <div class="empty-telemetry">
+            <p>Nenhuma leitura registrada para este ativo ainda.</p>
+            <small>Utilize o formulário ao lado para registrar a primeira leitura.</small>
+          </div>
+        } @else {
+          <div class="table-container">
+            <table class="telemetry-table">
+              <thead>
+                <tr>
+                  <th>Horário</th>
+                  <th>Potência</th>
+                  <th>Vento</th>
+                  <th>Temperatura</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of telemetry(); track item.timestamp) {
+                  <tr>
+                    <td>{{ item.timestamp | slice:11:19 }}</td>
+                    <td><strong>{{ item.powerMw }} MW</strong></td>
+                    <td>{{ item.windSpeedMs ? (item.windSpeedMs + ' m/s') : '—' }}</td>
+                    <td>
+                      <span 
+                        class="temp-tag"
+                        [class.temp-critical]="item.temperatureC >= 85"
+                        [class.temp-warning]="item.temperatureC >= 75 && item.temperatureC < 85"
+                      >
+                        {{ item.temperatureC }} °C
+                      </span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </section>
+
+      <!-- Coluna Direita: Formulário para Nova Leitura -->
+      <section class="form-section">
+        <div class="section-header">
+          <h3>Nova Leitura de Telemetria</h3>
+        </div>
+
+        <!-- Banners de Sucesso ou Erro -->
+        @if (formSuccessMessage()) {
+          <div class="alert-banner success-banner">
+            ✅ {{ formSuccessMessage() }}
+          </div>
+        }
+
+        @if (lastAlertCreated()) {
+          <div class="alert-banner critical-banner">
+            {{ lastAlertCreated() }}
+          </div>
+        }
+
+        @if (formErrorMessage()) {
+          <div class="alert-banner error-banner">
+            ⚠️ {{ formErrorMessage() }}
+          </div>
+        }
+
+        <form (ngSubmit)="onSubmitTelemetry()" class="telemetry-form">
+          <div class="form-group">
+            <label for="powerMw">Potência Gerada (MW):</label>
+            <input 
+              type="number" 
+              id="powerMw" 
+              name="powerMw" 
+              step="0.1" 
+              required 
+              [(ngModel)]="formPowerMw"
+              placeholder="Ex.: 2.8"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="windSpeedMs">Velocidade do Vento (m/s) [opcional]:</label>
+            <input 
+              type="number" 
+              id="windSpeedMs" 
+              name="windSpeedMs" 
+              step="0.1" 
+              [(ngModel)]="formWindSpeedMs"
+              placeholder="Ex.: 11.4"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="temperatureC">Temperatura (°C):</label>
+            <input 
+              type="number" 
+              id="temperatureC" 
+              name="temperatureC" 
+              step="0.5" 
+              required 
+              [(ngModel)]="formTemperatureC"
+              placeholder="Ex.: 90 (dispara Critical)"
+            />
+            <small class="input-hint">Dica: &gt;= 75°C gera WARNING; &gt;= 85°C gera CRITICAL.</small>
+          </div>
+
+          <button 
+            type="submit" 
+            class="btn-submit" 
+            [disabled]="submitting()"
+          >
+            @if (submitting()) {
+              Enviando ao NestJS...
+            } @else {
+              ⚡ Registrar Leitura
+            }
+          </button>
+        </form>
+      </section>
+    </div>
+  }
+</section>

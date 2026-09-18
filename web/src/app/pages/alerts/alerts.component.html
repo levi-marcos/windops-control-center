@@ -1,0 +1,72 @@
+<section class="alerts-page">
+  <div class="page-header">
+    <div>
+      <h2>Alertas do Parque</h2>
+      <p class="subtitle">Eventos WARNING e CRITICAL gerados pela regra de temperatura</p>
+    </div>
+    <button type="button" class="btn-refresh" (click)="loadAlerts()" title="Recarregar alertas">
+      Recarregar
+    </button>
+  </div>
+
+  <!-- 1. Estado de LOADING -->
+  @if (loading()) {
+    <div class="state-container loading-state">
+      <div class="spinner"></div>
+      <p>Carregando alertas...</p>
+    </div>
+  }
+
+  <!-- 2. Estado de ERRO -->
+  @else if (error()) {
+    <div class="state-container error-state" role="alert">
+      <div class="state-icon">⚠️</div>
+      <h3>Erro na comunicação</h3>
+      <p>{{ error() }}</p>
+      <button type="button" class="btn-primary" (click)="loadAlerts()">Tentar novamente</button>
+    </div>
+  }
+
+  <!-- 3. Estado VAZIO (EMPTY) -->
+  @else if (alerts().length === 0) {
+    <div class="state-container empty-state">
+      <div class="state-icon">✅</div>
+      <h3>Nenhum alerta registrado</h3>
+      <p>Nenhum WARNING ou CRITICAL foi gerado até o momento.</p>
+    </div>
+  }
+
+  <!-- 4. SUCESSO: Lista de alertas -->
+  @else {
+    <div class="alerts-list">
+      @for (alert of alerts(); track alert.id) {
+        <article class="alert-item" [class]="'severity-' + alert.severity.toLowerCase()">
+          <div class="severity-indicator" aria-hidden="true">
+            {{ alert.severity === 'CRITICAL' ? '🔴' : '🟠' }}
+          </div>
+
+          <div class="alert-content">
+            <div class="alert-top">
+              <span class="severity-pill" [class]="'severity-' + alert.severity.toLowerCase()">
+                {{ alert.severity }}
+              </span>
+              <span class="alert-type">{{ alert.type }}</span>
+            </div>
+            <p class="alert-message">{{ alert.message }}</p>
+            <div class="alert-meta">
+              <a class="alert-asset" [routerLink]="['/assets', alert.assetId]">
+                ⚙️ {{ alert.assetId }}
+              </a>
+              <time class="alert-time"
+                [attr.datetime]="alert.timestamp">
+                {{ alert.timestamp | slice:0:16 }}
+              </time>
+            </div>
+          </div>
+
+          <span class="alert-id">{{ alert.id }}</span>
+        </article>
+      }
+    </div>
+  }
+</section>

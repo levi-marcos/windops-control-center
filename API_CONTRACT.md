@@ -56,22 +56,34 @@ Body:
 }
 ```
 
-Resposta sugerida:
+Resposta (201) — formato efetivo implementado:
 ```json
 {
-  "telemetry": {
+  "id": 5,
+  "assetId": "WT-001",
+  "powerMw": 2.8,
+  "windSpeedMs": 10.2,
+  "temperatureC": 80,
+  "timestamp": "2026-09-15T12:00:00.000Z",
+  "createdAt": "2026-09-15T12:00:00.010Z",
+  "severity": "WARNING",
+  "alert": {
+    "id": "AL-003",
     "assetId": "WT-001",
-    "powerMw": 2.8,
-    "windSpeedMs": 10.2,
-    "temperatureC": 80,
-    "timestamp": "2026-09-15T12:00:00.000Z"
-  },
-  "classification": "WARNING",
-  "alertCreated": true
+    "severity": "WARNING",
+    "type": "HIGH_TEMPERATURE",
+    "message": "Temperatura acima do limite de atenção.",
+    "timestamp": "2026-09-15T12:00:00.000Z",
+    "createdAt": "2026-09-15T12:00:00.008Z"
+  }
 }
 ```
 
+> **Decisão:** a resposta reutiliza a telemetria persistida com `severity` e `alert` anexados (flat), em vez do wrapper `{ telemetry, classification, alertCreated }`. A API schema real é a fonte de verdade; `API_CONTRACT.md` reflete o formato implementado.
+
 400: body inválido. 404: asset inexistente.
+
+Quando `severity = NORMAL`, o campo `alert` é `null` e nenhum alerta é criado.
 
 ## GET /alerts
 
@@ -103,8 +115,9 @@ Resposta sugerida:
 }
 ```
 
-## GET /dashboard/overview — opcional
+## GET /dashboard/overview
 
+Resposta:
 ```json
 {
   "totalAssets": 3,
@@ -116,4 +129,6 @@ Resposta sugerida:
 }
 ```
 
-A decisão frontend aggregation vs backend aggregation deve ser registrada.
+> **Decisão registrada:** KPIs calculados no backend via `GET /dashboard/overview` (opção B do wireframe), em vez de aggregation no frontend (opção A). Vantagem: 1 request, regras de negócio concentradas no backend, reutilizável por qualquer cliente. Requisição existente nos endpoints obrigatórios do desafio.
+
+A decisão frontend aggregation vs backend aggregation foi resolvida favorando **backend aggregation**.
