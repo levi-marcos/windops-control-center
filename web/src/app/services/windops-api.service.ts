@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import {
   Alert,
   Asset,
+  AssetStatus,
   AssetSummary,
   CreateTelemetryDto,
   DashboardOverview,
@@ -73,6 +74,14 @@ export class WindOpsApiService {
    */
   createTelemetry(id: string, dto: CreateTelemetryDto): Observable<TelemetryResult> {
     return this.http.post<TelemetryResult>(`${this.baseUrl}/assets/${id}/telemetry`, dto);
+  }
+
+  /**
+   * Atualiza o status de um ativo (ex.: OFFLINE, ONLINE)
+   * PATCH /assets/:id/status
+   */
+  updateAssetStatus(id: string, status: AssetStatus): Observable<Asset> {
+    return this.http.patch<Asset>(`${this.baseUrl}/assets/${id}/status`, { status });
   }
 
   /**

@@ -99,6 +99,55 @@
       .dot { background: #ef4444; box-shadow: 0 0 6px #ef4444; }
     }
   }
+
+  .status-area {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5rem;
+
+    .status-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.35rem;
+    }
+
+    .btn-status {
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+      padding: 0.45rem 0.9rem;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+
+      &:hover:not(:disabled) {
+        background: rgba(239, 68, 68, 0.25);
+      }
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+    }
+
+    .status-feedback {
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin: 0;
+
+      &.success {
+        color: #6ee7b7;
+      }
+
+      &.error {
+        color: #fca5a5;
+      }
+    }
+  }
 }
 
 /* Metric Cards */

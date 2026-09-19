@@ -4,7 +4,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { WindOpsApiService } from '../../services/windops-api.service';
-import { Asset, AssetSummary, Telemetry, TelemetryResult } from '../../models/windops.models';
+import { Asset, AssetStatus, AssetSummary, Telemetry, TelemetryResult } from '../../models/windops.models';
 
 @Component({
   selector: 'app-asset-detail',
@@ -31,6 +31,10 @@ export class AssetDetailComponent implements OnInit {
   readonly formSuccessMessage = signal<string | null>(null);
   readonly formErrorMessage = signal<string | null>(null);
   readonly lastAlertCreated = signal<string | null>(null);
+
+  // Estados da ação de mudança de status
+  readonly updatingStatus = signal<boolean>(false);
+  readonly statusFeedback = signal<{ type: 'success' | 'error'; message: string } | null>(null);
 
   // Campos do formulário
   formPowerMw: number = 2.8;
@@ -142,5 +146,38 @@ export class AssetDetailComponent implements OnInit {
     const id = this.assetId();
     this.apiService.getSummary(id).subscribe((s) => this.summary.set(s));
     this.apiService.getTelemetry(id).subscribe((t) => this.telemetry.set(t));
+  }
+
+  onToggleOffline(): void {
+    const current = this.asset();
+    if (!current || this.updatingStatus()) {
+      return;
+    }
+
+    const target: AssetStatus = current.status === 'OFFLINE' ? 'ONLINE' : 'OFFLINE';
+    this.updatingStatus.set(true);
+    this.statusFeedback.set(null);
+
+    this.apiService.updateAssetStatus(this.assetId(), target).subscribe({
+      next: (updated) => {
+        this.asset.set(updated);
+        this.updatingStatus.set(false);
+        this.statusFeedback.set({
+          type: 'success',
+          message:
+            target === 'OFFLINE'
+              ? 'Ativo marcado como OFFLINE.'
+              : 'Ativo reativado (ONLINE).',
+        });
+      },
+      error: (err) => {
+        this.updatingStatus.set(false);
+        this.statusFeedback.set({
+          type: 'error',
+          message: 'Falha ao atualizar o status do ativo.',
+        });
+        console.error('Erro no PATCH de status:', err);
+      },
+    });
   }
 }

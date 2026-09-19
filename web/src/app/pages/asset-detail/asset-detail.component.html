@@ -47,6 +47,33 @@
           <span class="dot"></span>
           {{ asset()?.status }}
         </span>
+
+        <div class="status-actions">
+          <button
+            type="button"
+            class="btn-status"
+            [disabled]="updatingStatus()"
+            (click)="onToggleOffline()"
+          >
+            @if (updatingStatus()) {
+              Atualizando...
+            } @else if (asset()?.status === 'OFFLINE') {
+              🔄 Reativar (Online)
+            } @else {
+              🛑 Marcar Offline
+            }
+          </button>
+
+          @if (statusFeedback()) {
+            <p
+              class="status-feedback"
+              [class.success]="statusFeedback()?.type === 'success'"
+              [class.error]="statusFeedback()?.type === 'error'"
+            >
+              {{ statusFeedback()?.message }}
+            </p>
+          }
+        </div>
       </div>
     </header>
 

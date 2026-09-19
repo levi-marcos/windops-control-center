@@ -177,4 +177,74 @@ describe('AssetDetailComponent', () => {
     expect(el.querySelector('.not-found-state')).toBeTruthy();
     expect(el.textContent).toContain('Ativo Não Encontrado');
   });
+
+  it('deve marcar o ativo como OFFLINE via PATCH e atualizar a UI', () => {
+    const fixture = TestBed.createComponent(AssetDetailComponent);
+    const component = fixture.componentInstance;
+
+    fixture.detectChanges();
+    flushInitialLoad();
+    fixture.detectChanges();
+
+    component.onToggleOffline();
+
+    const patch = httpMock.expectOne('http://localhost:3000/assets/WT-001/status');
+    expect(patch.request.method).toBe('PATCH');
+    expect(patch.request.body).toEqual({ status: 'OFFLINE' });
+    patch.flush({ ...mockAsset, status: 'OFFLINE' });
+
+    fixture.detectChanges();
+    expect(component.asset()?.status).toBe('OFFLINE');
+    expect(component.statusFeedback()?.type).toBe('success');
+
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.textContent).toContain('Ativo marcado como OFFLINE');
+    expect(el.textContent).toContain('Reativar (Online)');
+  });
+
+  it('deve reativar o ativo (ONLINE) quando ele estiver OFFLINE', () => {
+    const fixture = TestBed.createComponent(AssetDetailComponent);
+    const component = fixture.componentInstance;
+
+    fixture.detectChanges();
+    httpMock
+      .expectOne('http://localhost:3000/assets/WT-001')
+      .flush({ ...mockAsset, status: 'OFFLINE' });
+    httpMock.expectOne('http://localhost:3000/assets/WT-001/summary').flush(mockSummary);
+    httpMock.expectOne('http://localhost:3000/assets/WT-001/telemetry').flush(mockTelemetry);
+    fixture.detectChanges();
+
+    component.onToggleOffline();
+
+    const patch = httpMock.expectOne('http://localhost:3000/assets/WT-001/status');
+    expect(patch.request.body).toEqual({ status: 'ONLINE' });
+    patch.flush({ ...mockAsset, status: 'ONLINE' });
+
+    fixture.detectChanges();
+    expect(component.asset()?.status).toBe('ONLINE');
+    expect(component.statusFeedback()?.message).toContain('reativado');
+  });
+
+  it('deve exibir erro se a mudança de status falhar', () => {
+    const fixture = TestBed.createComponent(AssetDetailComponent);
+    const component = fixture.componentInstance;
+
+    fixture.detectChanges();
+    flushInitialLoad();
+    fixture.detectChanges();
+
+    component.onToggleOffline();
+
+    const patch = httpMock.expectOne('http://localhost:3000/assets/WT-001/status');
+    patch.flush(
+      { message: 'internal error' },
+      { status: 500, statusText: 'Internal Server Error' },
+    );
+
+    fixture.detectChanges();
+    expect(component.statusFeedback()?.type).toBe('error');
+
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('.status-feedback.error')).toBeTruthy();
+  });
 });
