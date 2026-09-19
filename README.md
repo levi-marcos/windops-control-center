@@ -1,6 +1,6 @@
-# ⚡ WindOps Control Center — Fullstack (Angular + NestJS)
+﻿# âš¡ WindOps Control Center â€” Fullstack (Angular + NestJS)
 
-Frontend e backend integrados do **Desafio Individual #4**: um control center para operação de ativos de energia renovável (eólico + solar).
+Frontend e backend integrados do **Desafio Individual #4**: um control center para operaÃ§Ã£o de ativos de energia renovÃ¡vel (eÃ³lico + solar).
 
 - **Frontend:** Angular 22 (standalone, Signals, SCSS) em `web/`
 - **Backend:** NestJS 12 + Prisma + Swagger em `api/`
@@ -8,7 +8,7 @@ Frontend e backend integrados do **Desafio Individual #4**: um control center pa
 
 ---
 
-## 🚀 Como rodar
+## ðŸš€ Como rodar
 
 ### 1. Backend (porta 3000)
 
@@ -20,8 +20,8 @@ npm run start:dev             # ou npm run build && npm run start:prod
 ```
 
 - Swagger interativo: http://localhost:3000/docs
-- Health: http://localhost:3000/health → `{ "status": "ok" }`
-- Os 3 ativos de seed (`WT-001`, `WT-002`, `PV-001`) são criados no primeiro boot.
+- Health: http://localhost:3000/health â†’ `{ "status": "ok" }`
+- Os 3 ativos de seed (`WT-001`, `WT-002`, `PV-001`) sÃ£o criados no primeiro boot.
 
 ### 2. Frontend (porta 4200)
 
@@ -31,23 +31,23 @@ npm install
 npm start                     # http://localhost:4200
 ```
 
-> Em desenvolvimento o frontend aponta para `http://localhost:3000` (via `src/environments/environment.ts`). O CORS do NestJS libera explicitamente `http://localhost:4200` e `https://levi-marcos.github.io` — nada de `origin: '*'`.
+> Em desenvolvimento o frontend aponta para `http://localhost:3000` (via `src/environments/environment.ts`). O CORS do NestJS libera explicitamente `http://localhost:4200` e `https://levi-marcos.github.io` â€” nada de `origin: '*'`.
 
-## 📖 Rotas do frontend
+## ðŸ“– Rotas do frontend
 
-| Rota | Página |
+| Rota | PÃ¡gina |
 |---|---|
 | `/` | Dashboard operacional (KPIs via `GET /dashboard/overview`) |
 | `/assets` | Lista de ativos (filtros, loading/error/empty, link para detalhe) |
-| `/assets/:id` | Detalhe — summary, telemetria recente e formulário de nova leitura |
-| `/alerts` | Alertas WARNING/CRITICAL (severidade textual, não só cor) |
+| `/assets/:id` | Detalhe â€” summary, telemetria recente e formulÃ¡rio de nova leitura |
+| `/alerts` | Alertas WARNING/CRITICAL (severidade textual, nÃ£o sÃ³ cor) |
 
-## 🧪 Testes
+## ðŸ§ª Testes
 
 ```bash
 cd api
-npm run test        # 16 unitários (regra de temperatura, service, alerts)
-npm run test:e2e    # 8 e2e (health, 400/404, fluxo 90°C → CRITICAL, overview)
+npm run test        # 16 unitÃ¡rios (regra de temperatura, service, alerts)
+npm run test:e2e    # 8 e2e (health, 400/404, fluxo 90Â°C â†’ CRITICAL, overview)
 npm run lint
 
 cd web
@@ -55,41 +55,41 @@ npm test            # 15 testes (health, lista, detalhe, dashboard, alertas, POS
 npm run build
 ```
 
-## 🎯 Cenário obrigatório validado
+## ðŸŽ¯ CenÃ¡rio obrigatÃ³rio validado
 
 ```
-WT-001 → POST telemetry (temperatureC = 90) → NestJS classifica CRITICAL
-→ alerta AL-xxx criado → resposta volta → Angular atualiza summary/telemetria → UI reflete
+WT-001 â†’ POST telemetry (temperatureC = 90) â†’ NestJS classifica CRITICAL
+â†’ alerta AL-xxx criado â†’ resposta volta â†’ Angular atualiza summary/telemetria â†’ UI reflete
 ```
 
-Evidência: e2e do backend + testes de componente do frontend + validação manual via HTTP.
+EvidÃªncia: e2e do backend + testes de componente do frontend + validaÃ§Ã£o manual via HTTP.
 
-## ☁️ Deploy
+## â˜ï¸ Deploy
 
-### Frontend — GitHub Pages
+### Frontend â€” GitHub Pages
 
-O frontend é publicado em **GitHub Pages** (infra estática). O build de produção usa `src/environments/environment.prod.ts`.
+O frontend Ã© publicado em **GitHub Pages** (infra estÃ¡tica). O build de produÃ§Ã£o usa `src/environments/environment.prod.ts`.
 
 ```bash
 cd web
 ng build --configuration production --base-href /windops-control-center/
-# publicar o conteúdo de dist/web/browser em https://SEU_USUARIO.github.io/windops-control-center/
+# publicar o conteÃºdo de dist/web/browser em https://SEU_USUARIO.github.io/windops-control-center/
 ```
 
-### Backend — Render (para o demo online funcionar)
+### Backend â€” Render (para o demo online funcionar)
 
-O frontend publicado depende de um backend público para exibir dados reais. O blueprint `api/render.yaml` está pronto:
+O frontend publicado depende de um backend pÃºblico para exibir dados reais. O blueprint `api/render.yaml` estÃ¡ pronto:
 
-1. Crie o serviço em https://dashboard.render.com/blueprint?repo=SEU_USUARIO/SEU_REPO
-2. Associe um PostgreSQL e preencha `DATABASE_URL` no serviço.
-3. Aponte `web/src/environments/environment.prod.ts` → `https://windops-api.onrender.com`.
+1. Crie o serviÃ§o em https://dashboard.render.com/blueprint?repo=SEU_USUARIO/SEU_REPO
+2. Associe um PostgreSQL e preencha `DATABASE_URL` no serviÃ§o.
+3. Aponte `web/src/environments/environment.prod.ts` â†’ `https://windops-api-zo1o.onrender.com`.
 
-> Sem o backend no ar, o site publicado exibe o estado "API Indisponível" (comportamento intencional de erro, não vazio).
+> Sem o backend no ar, o site publicado exibe o estado "API IndisponÃ­vel" (comportamento intencional de erro, nÃ£o vazio).
 
-## 🧭 Arquivos da mentoria
+## ðŸ§­ Arquivos da mentoria
 
-- `AGENTS.md` e `FULLSTACK_MENTOR_PROTOCOL.md` — regras do modo mentor
-- `DESAFIO_04_WINDOPS_CONTROL_CENTER_FULLSTACK.md` — currículo do desafio
-- `API_CONTRACT.md` — contrato REST (fonte de verdade)
-- `WIREFRAMES.md` — decisões de interface
-- `MENTORIA_STATE.md` — progresso, ADRs e evidências
+- `AGENTS.md` e `FULLSTACK_MENTOR_PROTOCOL.md` â€” regras do modo mentor
+- `DESAFIO_04_WINDOPS_CONTROL_CENTER_FULLSTACK.md` â€” currÃ­culo do desafio
+- `API_CONTRACT.md` â€” contrato REST (fonte de verdade)
+- `WIREFRAMES.md` â€” decisÃµes de interface
+- `MENTORIA_STATE.md` â€” progresso, ADRs e evidÃªncias

@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiBaseUrl: 'https://windops-api.onrender.com',
+  apiBaseUrl: 'https://windops-api-zo1o.onrender.com',
 };
